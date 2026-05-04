@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a4a1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="કામ નોંધ" />
+  <title>કામ નોંધ – Land Surveyor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-dark: #1a4a1a;
+      --green: #2d6a2d;
+      --green-mid: #3d8a3d;
+      --green-light: #4a9e4a;
+      --green-pale: #f0f4f0;
+      --green-border: #e8f0e8;
+      --green-muted: #6b9a6b;
+      --green-faint: #9ab49a;
+      --green-tag: #f0f7f0;
+      --red: #ef4444;
+      --red-bg: #fff5f5;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --white: #ffffff;
+      --text: #1a2e1a;
+      --shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Noto Sans Gujarati', Georgia, serif;
+      background: var(--green-pale);
+      color: var(--text);
+      min-height: 100vh;
+      overscroll-behavior: none;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Inputs ── */
+    .inp {
+      width: 100%; background: var(--white);
+      border: 1.5px solid #d4e4d4; color: var(--text);
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 14px; outline: none;
+      font-family: inherit; transition: border .2s, box-shadow .2s;
+    }
+    .inp:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(45,106,45,.1); }
+    .inp::placeholder { color: var(--green-faint); }
+    select.inp {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d6a2d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-color: white;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      color: #fff; border: none; padding: 13px 24px;
+      border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; width: 100%; font-family: inherit;
+      box-shadow: 0 3px 12px rgba(45,106,45,.3); transition: all .2s;
+    }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-ghost {
+      background: #fff; color: var(--green);
+      border: 1.5px solid #c5dcc5; padding: 9px 16px;
+      border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all .2s;
+    }
+    .btn-ghost:active { background: var(--green-tag); }
+    .btn-back {
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; padding: 7px 14px; border-radius: 8px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+      margin-bottom: 16px; display: inline-block;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white); border-radius: 16px; padding: 16px;
+      margin-bottom: 12px; border: 1.5px solid var(--green-border);
+      box-shadow: var(--shadow); cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .card:active { transform: scale(.99); }
+
+    /* ── Status badges ── */
+    .badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+    .badge-chalu  { background: rgba(245,158,11,.15); color: var(--amber); }
+    .badge-purn   { background: rgba(16,185,129,.15);  color: var(--emerald); }
+    .badge-baki   { background: rgba(239,68,68,.15);   color: var(--red); }
+
+    /* ── Header ── */
+    .header-grad {
+      background: linear-gradient(160deg, var(--green-dark) 0%, var(--green) 60%, var(--green-mid) 100%);
+      padding: 48px 20px 24px; color: #fff;
+    }
+
+    /* ── Tabs ── */
+    .tab { padding: 7px 16px; border-radius: 7px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; white-space: nowrap; }
+    .tab.active   { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(45,106,45,.3); }
+    .tab.inactive { background: #fff; color: var(--green-muted); border: 1.5px solid #d4e4d4; }
+
+    /* ── Bottom Nav ── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 440px;
+      background: rgba(255,255,255,.97); backdrop-filter: blur(20px);
+      border-top: 1.5px solid var(--green-border);
+      padding: 10px 20px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100;
+    }
+    .nav-btn { background: none; border: none; font-size: 24px; cursor: pointer; transition: all .2s; }
+
+    /* ── FAB ── */
+    .fab {
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      border: none; width: 56px; height: 56px; border-radius: 18px;
+      font-size: 28px; cursor: pointer; color: #fff;
+      box-shadow: 0 4px 16px rgba(45,106,45,.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      background: var(--green); color: #fff; padding: 10px 22px;
+      border-radius: 30px; font-weight: 600; z-index: 9999;
+      font-size: 14px; box-shadow: 0 4px 16px rgba(45,106,45,.4);
+      display: none; white-space: nowrap;
+      animation: toastIn .3s ease;
+    }
+    @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(-10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .slide-up { animation: slideUp .3s ease; }
+
+    /* ── Progress bar ── */
+    .prog-wrap { height: 6px; background: #e8f0e8; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+    .prog-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--green-light), var(--green)); }
+
+    /* ── Section title ── */
+    .sec-title { font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 12px; }
+
+    /* ── Status buttons ── */
+    .status-btn {
+      flex: 1; padding: 9px 4px; border: 2px solid #d4e4d4;
+      border-radius: 9px; background: #fff; font-size: 13px;
+      font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s;
+      color: var(--green-faint);
+    }
+    .status-btn.active-chalu { border-color: var(--amber); background: rgba(245,158,11,.1); color: var(--amber); }
+    .status-btn.active-purn  { border-color: var(--emerald); background: rgba(16,185,129,.1); color: var(--emerald); }
+    .status-btn.active-baki  { border-color: var(--red); background: rgba(239,68,68,.1); color: var(--red); }
+
+    /* ── Stat mini card ── */
+    .stat-mini { background: rgba(255,255,255,.12); border-radius: 12px; padding: 12px 10px; text-align: center; border: 1px solid rgba(255,255,255,.15); }
+    .stat-mini p:first-child { font-size: 11px; color: rgba(255,255,255,.6); margin-bottom: 4px; }
+    .stat-mini p:last-child  { font-size: 22px; font-weight: 700; color: #fff; }
+
+    /* scrollable content */
+    .page-content { max-width: 440px; margin: 0 auto; padding-bottom: 90px; }
+
+    /* form label */
+    .lbl { font-size: 12px; font-weight: 600; color: var(--green-muted); display: block; margin-bottom: 5px; }
+
+    /* info grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .info-val { font-size: 13px; font-weight: 600; }
+    .info-key { font-size: 10px; color: var(--green-faint); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+
+    /* install banner */
+    #install-banner {
+      display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 408px;
+      background: var(--green-dark); color: #fff; padding: 14px 16px;
+      border-radius: 16px; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      align-items: center; gap: 12px;
+    }
+    #install-banner p { font-size: 13px; flex: 1; }
+    #install-banner button { background: #fff; color: var(--green-dark); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: inherit; }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="install-banner">
+  <p>📲 Home Screen પર Install કરો!</p>
+  <button onclick="installApp()">Install</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:transparent;color:rgba(255,255,255,.6);font-size:20px;padding:4px 8px;">✕</button>
+</div>
+
+<div id="screen-home" class="screen active">
+  <div class="header-grad">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;max-width:440px;margin:0 auto;">
+      <div>
+        <p style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase;">Land Surveyor</p>
+        <h1 style="font-size:26px;font-weight:700;margin-top:4px;">કામ નોંધ 📐</h1>
+      </div>
+      <button class="btn-ghost" onclick="goScreen('report')" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;">📊 રિપોર્ટ</button>
+    </div>
+    <div style="max-width:440px;margin:0 auto;">
+      <div id="home-stats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:20px;"></div>
+      <div id="home-money" style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px 16px;margin-top:14px;display:flex;justify-content:space-between;"></div>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding:16px 16px 90px;">
+    <input class="inp" id="search-inp" placeholder="🔍 નામ, સર્વે નં, ગામ..." oninput="renderJobs()" style="margin-bottom:10px;" />
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;" id="filter-tabs">
+      <button class="tab active" onclick="setFilter('બધા',this)">બધા</button>
+      <button class="tab inactive" onclick="setFilter('ચાલુ',this)">ચાલુ</button>
+      <button class="tab inactive" onclick="setFilter('પૂર્ણ',this)">પૂર્ણ</button>
+      <button class="tab inactive" onclick="setFilter('બાકી',this)">બાકી</button>
+    </div>
+    <div id="jobs-list"></div>
+  </div>
+</div>
+
+<div id="screen-add" class="screen">
+  <div style="max-width:440px;margin:0 auto;padding:48px 20px 90px;">
+    <button class="btn-back" onclick="goScreen('home')" style="background:none;border:none;color:var(--green);font-size:14px;font-family:inherit;cursor:pointer;padding:0;margin-bottom:20px;">← પાછા</button>
+    <h2 id="add-screen-title" style="font-size:22px;font-weight:700;margin-bottom:20px;">📐 નવું કામ ઉમેરો</h2>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div><label class="lbl">ગ્રાહકનું નામ *</label><input class="inp" id="f-naam" placeholder="દા.ત. રમેશભાઈ પટેલ" /></div>
+      <div><label class="lbl">ફોન નંબર</label><input class="inp" id="f-phone" type="tel" placeholder="9876543210" /></div>
+      <div><label class="lbl">સરનામું</label><input class="inp" id="f-sarnamu" placeholder="ગામ, તાલુકો, જિલ્લો" /></div>
+      <div><label class="lbl">સર્વે નં / ગામ</label><input class="inp" id="f-survey" placeholder="સર્વે નં. 123/A, ગામ: છત્રાલ" /></div>
+      <div>
+        <label class="lbl">કામનો પ્રકાર</label>
+        <select class="inp" id="f-type">
+          <option>જમીન માપણી</option>
+          <option>ખૂંટ માપણી</option>
+          <option>સ્ટ્રક્ચર લેઆઉટ</option>
+          <option>પ્લોટ માર્કિંગ</option>
+          <option>વિઝીટ વર્ક</option>
+          <option>કન્ટૂર સર્વે</option>
+          <option>ટોપોગ્રાફી સર્વે</option>
+          <option>અન્ય વર્ક</option>
+        </select>
+      </div>
+      <div><label class="lbl">કામની તારીખ</label><input class="inp" id="f-date" type="date" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="lbl">કુલ રકમ (₹) *</label><input class="inp" id="f-total" type="number" placeholder="5000" /></div>
+        <div id="adv-input-wrap"><label class="lbl">એડવાન્સ (₹)</label><input class="inp" id="f-advance" type="number" placeholder="2000" /></div>
+      </div>
+      <div><label class="lbl">નોંધ</label><input class="inp" id="f-nondh" placeholder="દા.ત. 2 વીઘા જમીન, ખેતીની" /></div>
+      <div>
+        <label class="lbl">સ્ટેટસ</label>
+        <div style="display:flex;gap:8px;" id="add-status-btns">
+          <button class="status-btn active-chalu" onclick="selectAddStatus('ચાલુ',this)">ચાલુ</button>
+          <button class="status-btn" onclick="selectAddStatus('પૂર્ણ',this)">પૂર્ણ</button>
+          <button class="status-btn" onclick="selectAddStatus('બાકી',this)">બાકી</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveJob()" style="margin-top:6px;">✓ સાચવો</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-detail" class="screen">
+  <div id="detail-content" style="max-width:440px;margin:0 auto;padding-bottom:90px;"></div>
+</div>
+
+<div id="screen-report" class="screen">
+  <div style="max-width:440px;margin:0 auto;padding:48px 20px 90px;">
+    <button onclick="goScreen('home')" style="background:none;border:none;color:var(--green);font-size:14px;font-family:inherit;cursor:pointer;margin-bottom:20px;">← પાછા</button>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:20px;">📊 હિસાબ રિપોર્ટ</h2>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<div id="bottom-nav">
+  <button class="nav-btn" id="nav-home" onclick="goScreen('home')">🏠</button>
+  <button class="fab" onclick="goScreen('add')">+</button>
+  <button class="nav-btn" id="nav-report" onclick="goScreen('report')">📊</button>
+</div>
+
+<script>
+// ══════════════════════════════
+//  DATA
+// ══════════════════════════════
+const STORE_KEY = 'surveyor_jobs_v1';
+let jobs = [];
+let currentFilter = 'બધા';
+let addStatus = 'ચાલુ';
+let selectedId = null;
+let editMode = false;
+
+function loadJobs() {
+  try { jobs = JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch { jobs = []; }
+}
+function saveJobs() { localStorage.setItem(STORE_KEY, JSON.stringify(jobs)); }
+
+function bakiRakam(job) {
+  const paid = job.payments.reduce((s,p) => s + p.rakam, 0);
+  return job.kulRakam - paid;
+}
+
+// ══════════════════════════════
+//  SCREEN
+// ══════════════════════════════
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if (name==='home')   { renderHome(); document.getElementById('nav-home').style.color='#2d6a2d'; document.getElementById('nav-report').style.color='#c5dcc5'; }
+  if (name==='report') { renderReport(); document.getElementById('nav-report').style.color='#2d6a2d'; document.getElementById('nav-home').style.color='#c5dcc5'; }
+  if (name==='add' && !editMode) { initAddForm(); }
+  if (name==='detail') { renderDetail(); }
+}
+
+// ══════════════════════════════
+//  HOME
+// ══════════════════════════════
+function renderHome() {
+  editMode = false;
+  const total = jobs.length;
+  const chalu = jobs.filter(j=>j.status==='ચાલુ').length;
+  const purn  = jobs.filter(j=>j.status==='પૂર્ણ').length;
+  const kulRakam  = jobs.reduce((s,j)=>s+j.kulRakam,0);
+  const malyu = jobs.reduce((s,j)=>s+j.payments.reduce((ps,p)=>ps+p.rakam,0),0);
+  const baki  = kulRakam - malyu;
+
+  document.getElementById('home-stats').innerHTML = `
+    <div class="stat-mini"><p>કુલ કામ</p><p>${total}</p></div>
+    <div class="stat-mini"><p>ચાલુ</p><p style="color:#fbbf24">${chalu}</p></div>
+    <div class="stat-mini"><p>પૂર્ણ</p><p style="color:#6ee7b7">${purn}</p></div>`;
+
+  document.getElementById('home-money').innerHTML = `
+    <div><p style="font-size:11px;color:rgba(255,255,255,.5)">કુલ બિલ</p><p style="font-size:16px;font-weight:700;color:#fff">₹${fmt(kulRakam)}</p></div>
+    <div style="text-align:center"><p style="font-size:11px;color:rgba(255,255,255,.5)">મળ્યું</p><p style="font-size:16px;font-weight:700;color:#6ee7b7">₹${fmt(malyu)}</p></div>
+    <div style="text-align:right"><p style="font-size:11px;color:rgba(255,255,255,.5)">બાકી</p><p style="font-size:16px;font-weight:700;color:#fca5a5">₹${fmt(baki)}</p></div>`;
+
+  renderJobs();
+}
+
+function renderJobs() {
+  const search = (document.getElementById('search-inp')||{value:''}).value.toLowerCase();
+  const filtered = jobs.filter(j => {
+    const ms = j.naam.toLowerCase().includes(search) || j.surveyNo.toLowerCase().includes(search) || j.sarnamu.toLowerCase().includes(search);
+    const mf = currentFilter==='બધા' || j.status===currentFilter;
+    return ms && mf;
+  });
+  const list = document.getElementById('jobs-list');
+  if (!list) return;
+  if (filtered.length===0) { list.innerHTML='<div style="text-align:center;padding:48px 0;color:#9ab49a"><div style="font-size:48px">📋</div><p style="margin-top:8px">કોઈ કામ નથી</p></div>'; return; }
+
+  list.innerHTML = filtered.map(job => {
+    const baki = bakiRakam(job);
+    const paid = job.payments.reduce((s,p)=>s+p.rakam,0);
+    const pct  = job.kulRakam>0 ? Math.round((paid/job.kulRakam)*100) : 0;
+    const bclass = job.status==='પૂર્ણ'?'badge-purn': job.status==='ચાલુ'?'badge-chalu':'badge-baki';
+    return `
+    <div class="card slide-up" onclick="openDetail(${job.id})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <h3 style="font-size:16px;font-weight:700">${job.naam}</h3>
+            <span class="badge ${bclass}">${job.status}</span>
+          </div>
+          <p style="font-size:12px;color:#6b9a6b;margin-top:3px">📍 ${job.sarnamu||'-'}</p>
+          <p style="font-size:11px;color:#9ab49a;margin-top:2px">📄 ${job.surveyNo||'-'}</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:8px">
+          <p style="font-size:13px;font-weight:700;color:#2d6a2d">₹${fmt(job.kulRakam)}</p>
+          ${baki>0?`<p style="font-size:11px;color:#ef4444;margin-top:2px">બાકી ₹${fmt(baki)}</p>`:`<p style="font-size:11px;color:#10b981;margin-top:2px">✓ ચૂકવ્યું</p>`}
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;background:#f0f7f0;color:#2d6a2d;padding:3px 10px;border-radius:20px;font-weight:600">📐 ${job.kamPrakar}</span>
+        <span style="font-size:11px;color:#9ab49a">📅 ${fmtDate(job.tarikh)}</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <p style="font-size:10px;color:#9ab49a;margin-top:4px">ચૂકવ્યું: ${pct}%</p>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(val, btn) {
+  currentFilter = val;
+  document.querySelectorAll('#filter-tabs .tab').forEach(t => { t.classList.remove('active'); t.classList.add('inactive'); });
+  btn.classList.add('active'); btn.classList.remove('inactive');
+  renderJobs();
+}
+
+// ══════════════════════════════
+//  ADD / EDIT JOB
+// ══════════════════════════════
+function initAddForm() {
+  editMode = false;
+  document.getElementById('add-screen-title').textContent = '📐 નવું કામ ઉમેરો';
+  document.getElementById('f-naam').value='';
+  document.getElementById('f-phone').value='';
+  document.getElementById('f-sarnamu').value='';
+  document.getElementById('f-survey').value='';
+  document.getElementById('f-type').value='જમીન માપણી';
+  document.getElementById('f-date').value=todayStr();
+  document.getElementById('f-total').value='';
+  document.getElementById('f-advance').value='';
+  document.getElementById('f-nondh').value='';
+  document.getElementById('adv-input-wrap').style.display = 'block';
+  addStatus='ચાલુ';
+  document.querySelectorAll('#add-status-btns .status-btn').forEach(b=>{b.className='status-btn';});
+  document.querySelector('#add-status-btns .status-btn').className='status-btn active-chalu';
+}
+
+function selectAddStatus(val, btn) {
+  addStatus=val;
+  document.querySelectorAll('#add-status-btns .status-btn').forEach(b=>b.className='status-btn');
+  const cls = val==='ચાલુ'?'active-chalu': val==='પૂર્ણ'?'active-purn':'active-baki';
+  btn.className='status-btn '+cls;
+}
+
+function saveJob() {
+  const naam = document.getElementById('f-naam').value.trim();
+  const total = parseFloat(document.getElementById('f-total').value);
+  if (!naam) { showToast('ગ્રાહકનું નામ ભરો!'); return; }
+  if (!total || total<=0) { showToast('કુલ રકમ ભરો!'); return; }
+
+  if (editMode) {
+    // Edit existing job
+    const job = jobs.find(j=>j.id===selectedId);
+    if (!job) return;
+    job.naam = naam;
+    job.phone = document.getElementById('f-phone').value.trim();
+    job.sarnamu = document.getElementById('f-sarnamu').value.trim();
+    job.surveyNo = document.getElementById('f-survey').value.trim();
+    job.kamPrakar = document.getElementById('f-type').value;
+    job.tarikh = document.getElementById('f-date').value;
+    job.kulRakam = total;
+    job.nondh = document.getElementById('f-nondh').value.trim();
+    job.status = addStatus;
+
+    saveJobs();
+    showToast('✓ ફેરફારો સાચવ્યા!');
+    goScreen('detail');
+  } else {
+    // Add new job
+    const adv = parseFloat(document.getElementById('f-advance').value)||0;
+    const newJob = {
+      id: Date.now(),
+      naam, phone: document.getElementById('f-phone').value.trim(),
+      sarnamu: document.getElementById('f-sarnamu').value.trim(),
+      surveyNo: document.getElementById('f-survey').value.trim(),
+      kamPrakar: document.getElementById('f-type').value,
+      tarikh: document.getElementById('f-date').value,
+      kulRakam: total, advance: adv,
+      payments: adv>0?[{id: Date.now(), rakam:adv, tarikh:document.getElementById('f-date').value, prakar:'એડવાન્સ'}]:[],
+      status: addStatus,
+      nondh: document.getElementById('f-nondh').value.trim(),
+    };
+    jobs.unshift(newJob); saveJobs();
+    showToast('✓ નવું કામ ઉમેરાયું!');
+    goScreen('home');
+  }
+}
+
+function openEditForm() {
+  const job = jobs.find(j=>j.id===selectedId);
+  if (!job) return;
+  editMode = true;
+  document.getElementById('add-screen-title').textContent = '✏️ કામની વિગત સુધારો';
+  document.getElementById('f-naam').value = job.naam;
+  document.getElementById('f-phone').value = job.phone || '';
+  document.getElementById('f-sarnamu').value = job.sarnamu || '';
+  document.getElementById('f-survey').value = job.surveyNo || '';
+  document.getElementById('f-type').value = job.kamPrakar;
+  document.getElementById('f-date').value = job.tarikh;
+  document.getElementById('f-total').value = job.kulRakam;
+  document.getElementById('f-nondh').value = job.nondh || '';
+  
+  // એડિટિંગ વખતે નવું એડવાન્સ ઇનપુટ છુપાવીએ
+  document.getElementById('adv-input-wrap').style.display = 'none';
+
+  addStatus = job.status;
+  document.querySelectorAll('#add-status-btns .status-btn').forEach(b=>b.className='status-btn');
+  const cls = addStatus==='ચાલુ'?'active-chalu': addStatus==='પૂર્ણ'?'active-purn':'active-baki';
+  const btns = document.querySelectorAll('#add-status-btns .status-btn');
+  if(addStatus==='ચાલુ') btns[0].className='status-btn '+cls;
+  if(addStatus==='પૂર્ણ') btns[1].className='status-btn '+cls;
+  if(addStatus==='બાકી') btns[2].className='status-btn '+cls;
+
+  goScreen('add');
+}
+
+// ══════════════════════════════
+//  DETAIL
+// ══════════════════════════════
+function openDetail(id) { selectedId=id; goScreen('detail'); }
+
+function renderDetail() {
+  const job = jobs.find(j=>j.id===selectedId);
+  if (!job) { goScreen('home'); return; }
+  const baki = bakiRakam(job);
+  const paid = job.payments.reduce((s,p)=>s+p.rakam,0);
+  const pct  = job.kulRakam>0 ? Math.round((paid/job.kulRakam)*100):0;
+  const bclass = job.status==='પૂર્ણ'?'badge-purn': job.status==='ચાલુ'?'badge-chalu':'badge-baki';
+
+  const payHistHTML = job.payments.length===0
+    ? `<p style="color:#9ab49a;font-size:13px">કોઈ ચૂકવણી નથી</p>`
+    : job.payments.map((p,i)=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;${i<job.payments.length-1?'border-bottom:1px solid #e8f0e8':''}">
+        <div>
+          <p style="font-size:14px;font-weight:600">${p.prakar}</p>
+          <p style="font-size:11px;color:#9ab49a;margin-top:2px">${fmtDate(p.tarikh)}</p>
+        </div>
+        <div style="text-align:right; display:flex; align-items:center; gap:12px;">
+          <p style="font-size:15px;font-weight:700;color:#10b981">+₹${fmt(p.rakam)}</p>
+          <button onclick="deletePayment(${p.id || 0}, ${p.rakam})" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+      </div>`).join('');
+
+  const payFormHTML = baki>0 ? `
+    <div class="card">
+      <p class="sec-title">➕ પેમેન્ટ ઉમેરો</p>
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <input class="inp" type="number" id="d-pay-amt" placeholder="₹ (બાકી: ${fmt(baki)})" style="flex:1"/>
+        <select class="inp" id="d-pay-type" style="width:130px">
+          <option>એડવાન્સ</option><option selected>હપ્તો</option><option>સંપૂર્ણ</option><option>અન્ય</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="addPayment()">✓ પેમેન્ટ ઉમેરો</button>
+    </div>` : '';
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="header-grad">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="btn-back" onclick="goScreen('home')">← પાછા</button>
+        <button class="btn-ghost" onclick="openEditForm()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;margin-bottom:16px;">✏️ સુધારો</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h2 style="font-size:22px;font-weight:700">${job.naam}</h2>
+          ${job.phone?`<p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:4px">📞 <a href="tel:${job.phone}" style="color:#fff;text-decoration:none;font-weight:bold;">${job.phone}</a></p>`:''}
+          <p style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px">📍 ${job.sarnamu||'-'}</p>
+        </div>
+        <span class="badge ${bclass}">${job.status}</span>
+      </div>
+    </div>
+
+    <div style="padding:0 16px;">
+      <div class="card slide-up" style="margin-top:16px;">
+        <div class="info-grid">
+          ${[['સર્વે નં',job.surveyNo||'-'],['કામ પ્રકાર',job.kamPrakar],['તારીખ',fmtDate(job.tarikh)],['નોંધ',job.nondh||'-']].map(([k,v])=>`
+          <div><p class="info-key">${k}</p><p class="info-val">${v}</p></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="card slide-up">
+        <p class="sec-title">💰 નાણાં વિગત</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+          <div style="background:#f0f7f0;border-radius:10px;padding:10px"><p style="font-size:10px;color:#6b9a6b">કુલ બિલ</p><p style="font-size:16px;font-weight:700;margin-top:3px">₹${fmt(job.kulRakam)}</p></div>
+          <div style="background:#f0fdf4;border-radius:10px;padding:10px"><p style="font-size:10px;color:#6b9a6b">મળ્યું</p><p style="font-size:16px;font-weight:700;color:#10b981;margin-top:3px">₹${fmt(paid)}</p></div>
+          <div style="background:${baki>0?'#fff5f5':'#f0fdf4'};border-radius:10px;padding:10px"><p style="font-size:10px;color:#6b9a6b">બાકી</p><p style="font-size:16px;font-weight:700;color:${baki>0?'#ef4444':'#10b981'};margin-top:3px">₹${fmt(baki)}</p></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:11px;color:#9ab49a">ચૂકવ્યું</span>
+            <span style="font-size:11px;font-weight:600;color:#2d6a2d">${pct}%</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+
+      <div class="card slide-up">
+        <p class="sec-title">🔄 સ્ટેટસ બદલો</p>
+        <div style="display:flex;gap:8px;">
+          ${['ચાલુ','પૂર્ણ','બાકી'].map(s=>{
+            const active = job.status===s;
+            const cls = active?(s==='ચાલુ'?'active-chalu':s==='પૂર્ણ'?'active-purn':'active-baki'):'';
+            return `<button class="status-btn ${cls}" onclick="changeStatus('${s}')">${s}</button>`;
+          }).join('')}
+        </div>
+      </div>
+
+      ${payFormHTML}
+
+      <div class="card slide-up">
+        <p class="sec-title">📋 ચૂકવણી ઇતિહાસ</p>
+        ${payHistHTML}
+      </div>
+
+      <button class="btn-ghost" onclick="deleteJob(${job.id})" style="color:#ef4444;border-color:#fca5a5;width:100%;margin-top:8px;margin-bottom:16px;">🗑️ આ કામ ડિલીટ કરો</button>
+    </div>`;
+}
+
+function addPayment() {
+  const job = jobs.find(j=>j.id===selectedId);
+  if (!job) return;
+  const amt = parseFloat(document.getElementById('d-pay-amt').value);
+  const prakar = document.getElementById('d-pay-type').value;
+  if (!amt || amt<=0) { showToast('રકમ ભરો!'); return; }
+  const baki = bakiRakam(job);
+  if (amt>baki) { showToast(`બાકી ₹${fmt(baki)} થી વધુ ન ભરાય!`); return; }
+  
+  job.payments.push({ id: Date.now(), rakam:amt, tarikh:todayStr(), prakar });
+  if (amt>=baki) job.status='પૂર્ણ';
+  saveJobs(); showToast('✓ પેમેન્ટ ઉમેરાયું!');
+  renderDetail();
+}
+
+function deletePayment(payId, amt) {
+  if (confirm(`શું તમે આ ₹${fmt(amt)} નું પેમેન્ટ ડિલીટ કરવા માંગો છો?`)) {
+    const job = jobs.find(j=>j.id===selectedId);
+    if (!job) return;
+    job.payments = job.payments.filter(p => (p.id || 0) !== payId);
+    
+    // પેમેન્ટ ડિલીટ કર્યા પછી જો બાકી રકમ વધે તો સ્ટેટસ ચાલુ કરી દેવું
+    if (bakiRakam(job) > 0 && job.status === 'પૂર્ણ') {
+      job.status = 'ચાલુ';
+    }
+    
+    saveJobs();
+    showToast('✕ પેમેન્ટ ડિલીટ થઈ ગયું');
+    renderDetail();
+  }
+}
+
+function changeStatus(s) {
+  const job = jobs.find(j=>j.id===selectedId);
+  if (!job) return;
+  job.status=s; saveJobs();
+  showToast('✓ સ્ટેટસ બદલ્યો!'); renderDetail();
+}
+
+function deleteJob(id) {
+  if (confirm('શું તમે ખરેખર આ કામ ડિલીટ કરવા માંગો છો?')) {
+    jobs = jobs.filter(j => j.id !== id);
+    saveJobs();
+    showToast('✕ કામ ડિલીટ થઈ ગયું');
+    goScreen('home');
+  }
+}
+
+// ══════════════════════════════
+//  REPORT
+// ══════════════════════════════
+function renderReport() {
+  editMode = false;
+  const kulRakam = jobs.reduce((s,j)=>s+j.kulRakam,0);
+  const malyu    = jobs.reduce((s,j)=>s+j.payments.reduce((ps,p)=>ps+p.rakam,0),0);
+  const baki     = kulRakam-malyu;
+
+  const byType = {};
+  jobs.forEach(j=>{
+    if (!byType[j.kamPrakar]) byType[j.kamPrakar]={count:0,total:0};
+    byType[j.kamPrakar].count++;
+    byType[j.kamPrakar].total+=j.kulRakam;
+  });
+
+  const bakiJobs = jobs.filter(j=>bakiRakam(j)>0);
+
+  document.getElementById('report-content').innerHTML = `
+    <div style="background:linear-gradient(135deg,#1a4a1a,#2d6a2d);border-radius:18px;padding:20px;color:#fff;margin-bottom:16px;">
+      <p style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:12px">એકંદર સારાંશ</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:12px"><p style="font-size:11px;color:rgba(255,255,255,.6)">કુલ કામ</p><p style="font-size:18px;font-weight:700;margin-top:4px">${jobs.length}</p></div>
+        <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:12px"><p style="font-size:11px;color:rgba(255,255,255,.6)">ચૂકવ્યું</p><p style="font-size:18px;font-weight:700;margin-top:4px;color:#6ee7b7">₹${fmt(malyu)}</p></div>
+        <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:12px"><p style="font-size:11px;color:rgba(255,255,255,.6)">કુલ બિલ</p><p style="font-size:18px;font-weight:700;margin-top:4px">₹${fmt(kulRakam)}</p></div>
+        <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:12px"><p style="font-size:11px;color:rgba(255,255,255,.6)">બાકી</p><p style="font-size:18px;font-weight:700;margin-top:4px;color:#fca5a5">₹${fmt(baki)}</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="sec-title">💾 ડેટા બેકઅપ અને રીસ્ટોર</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-ghost" onclick="exportData()" style="flex:1;">📥 બેકઅપ ડાઉનલોડ</button>
+        <button class="btn-ghost" onclick="document.getElementById('import-file').click()" style="flex:1;">📤 રીસ્ટોર કરો</button>
+        <input type="file" id="import-file" style="display:none;" onchange="importData(this)" accept=".json" />
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="sec-title">કામ પ્રકાર પ્રમાણે</p>
+      ${Object.entries(byType).map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f4f0">
+          <div><p style="font-size:14px;font-weight:600">📐 ${k}</p><p style="font-size:11px;color:#9ab49a;margin-top:2px">${v.count} કામ</p></div>
+          <p style="font-size:15px;font-weight:700;color:#2d6a2d">₹${fmt(v.total)}</p>
+        </div>`).join('')||'<p style="color:#9ab49a;font-size:13px">કોઈ કામ નથી</p>'}
+    </div>
+
+    <div class="card">
+      <p class="sec-title" style="color:#ef4444">⚠️ બાકી લેણું</p>
+      ${bakiJobs.length===0
+        ? '<p style="color:#9ab49a;font-size:13px">✓ બધી ચૂકવણી થઈ ગઈ!</p>'
+        : bakiJobs.map(j=>`
+          <div onclick="openDetail(${j.id})" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f4f0;cursor:pointer">
+            <div><p style="font-size:14px;font-weight:600">${j.naam}</p><p style="font-size:11px;color:#9ab49a;margin-top:2px">${j.sarnamu||'-'}</p></div>
+            <p style="font-size:15px;font-weight:700;color:#ef4444">₹${fmt(bakiRakam(j))}</p>
+          </div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════
+//  BACKUP & RESTORE UTILS
+// ══════════════════════════════
+function exportData() {
+  const dataStr = localStorage.getItem(STORE_KEY) || '[]';
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kam_nondh_backup_${todayStr()}.json`;
+  a.click();
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedJobs = JSON.parse(e.target.result);
+      if (Array.isArray(importedJobs)) {
+        jobs = importedJobs;
+        saveJobs();
+        renderHome();
+        showToast('✓ ડેટા રીસ્ટોર થઈ ગયો!');
+        input.value = '';
+      } else {
+        showToast('ખોટી ફાઈલ છે!');
+      }
+    } catch (err) {
+      showToast('ફાઈલ વાંચવામાં ભૂલ થઈ!');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════
+//  UTILS
+// ══════════════════════════════
+function fmt(n) { return (n||0).toLocaleString('en-IN'); }
+
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  const months=['જાન','ફેબ','માર','એપ','મે','જૂન','જુલ','ઓગ','સપ','ઓક','નવ','ડિસ'];
+  return `${day} ${months[parseInt(m)-1]} ${y}`;
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.style.display='none', 2500);
+}
+
+// ══════════════════════════════
+//  PWA INSTALL
+// ══════════════════════════════
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('install-banner').style.display='none'; });
+}
+window.addEventListener('appinstalled', ()=>{ document.getElementById('install-banner').style.display='none'; });
+
+// ══════════════════════════════
+//  INIT
+// ══════════════════════════════
+loadJobs();
+document.getElementById('f-date') && (document.getElementById('f-date').value=todayStr());
+renderHome();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE='surveyor-v4';
+    self.addEventListener('install', e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']))));
+    self.addEventListener('fetch', e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+</script>
+</body>
+</html>
